@@ -12,7 +12,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
     // Title for 3s
     timers.push(setTimeout(() => setPhase("founder"), 3000));
     // Founder for 3.5s
