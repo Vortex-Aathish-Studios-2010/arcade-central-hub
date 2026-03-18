@@ -1,27 +1,62 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SplashScreen } from "@/components/SplashScreen";
+import { DeviceSelector, getDeviceType, DeviceType } from "@/components/DeviceSelector";
+import { DeviceProvider } from "@/lib/DeviceContext";
+import Index from "./pages/Index";
+import EntertainmentPage from "./pages/EntertainmentPage";
+import EntertainmentGamePage from "./pages/EntertainmentGamePage";
+import GamePage from "./pages/GamePage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+  const [showDeviceSelector, setShowDeviceSelector] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    if (!getDeviceType()) {
+      setShowDeviceSelector(true);
+    } else {
+      setReady(true);
+    }
+  };
+
+  const handleDeviceSelect = (_device: DeviceType) => {
+    setShowDeviceSelector(false);
+    setReady(true);
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <DeviceProvider>
+          <Toaster />
+          <Sonner />
+          {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+          {showDeviceSelector && <DeviceSelector onSelect={handleDeviceSelect} />}
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/game/:id" element={<GamePage />} />
+              <Route path="/entertainment" element={<EntertainmentPage />} />
+              <Route path="/entertainment/:id" element={<EntertainmentGamePage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </DeviceProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
