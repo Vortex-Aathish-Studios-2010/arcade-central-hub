@@ -71,4 +71,5 @@ export const sfx = {
     setTimeout(() => play(400, "sawtooth", 0.08, 0.06), 140);
   },
   speedUp: () => play(600, "triangle", 0.1, 0.08),
+  speedDown: () => play(400, "triangle", 0.1, 0.08),
 };

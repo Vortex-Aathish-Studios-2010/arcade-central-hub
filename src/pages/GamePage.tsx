@@ -1,5 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { games } from "@/lib/gameData";
+import { MemoryGame } from "@/components/games/MemoryGame";
+import { SlidingPuzzle } from "@/components/games/SlidingPuzzle";
+import { BlockStack } from "@/components/games/BlockStack";
+import { SudokuGame } from "@/components/games/SudokuGame";
+import { KonoodleGame } from "@/components/games/KonoodleGame";
+import { WordSearchGame } from "@/components/games/WordSearchGame";
+import { SnakeGame } from "@/components/games/SnakeGame";
+import { TicTacToeGame } from "@/components/games/TicTacToeGame";
+import { OnScreenControls } from "@/components/OnScreenControls";
 import { SimpleGame } from "@/components/games/SimpleGame";
 import { ArrowLeft, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,6 +17,17 @@ import { isTutorialShown, markTutorialShown, getGameLevel } from "@/lib/streaks"
 import { GameTutorial } from "@/components/GameTutorial";
 
 const HIDE_LEVEL_IDS = new Set(["tetris", "snake", "konoodle", "tictactoe"]);
+
+const gameComponents: Record<string, React.ComponentType<{ level?: number; onComplete?: (score: number) => void }>> = {
+  memory: MemoryGame,
+  sliding: SlidingPuzzle,
+  tetris: BlockStack,
+  sudoku: SudokuGame,
+  konoodle: KonoodleGame,
+  wordsearch: WordSearchGame,
+  snake: SnakeGame,
+  tictactoe: TicTacToeGame,
+};
 
 const GamePage = () => {
   const { id } = useParams();
@@ -27,6 +47,7 @@ const GamePage = () => {
   }
 
   const showLevel = id && !HIDE_LEVEL_IDS.has(id);
+  const GameComponent = id ? gameComponents[id] : null;
 
   return (
     <motion.div
@@ -34,7 +55,6 @@ const GamePage = () => {
       animate={{ opacity: 1 }}
       className="fixed inset-0 flex flex-col bg-background"
     >
-      {/* Minimal top bar */}
       <div className="flex items-center justify-between p-3">
         <button
           onClick={() => navigate("/?mode=brain")}
@@ -55,16 +75,20 @@ const GamePage = () => {
         </div>
       </div>
 
-      {/* Game title */}
       <div className="flex items-center gap-3 px-4 pb-2">
         {game.icon}
         <h1 className="font-display text-xl font-bold text-foreground">{game.name}</h1>
       </div>
 
-      {/* Game fills screen */}
       <div className="flex-1 overflow-auto px-2 pb-4">
-        <SimpleGame game={game} onBack={() => navigate("/?mode=brain")} />
+        {GameComponent ? (
+          <GameComponent level={level} onComplete={() => {}} />
+        ) : (
+          <SimpleGame game={game} onBack={() => navigate("/?mode=brain")} />
+        )}
       </div>
+
+      <OnScreenControls gameId={id} />
 
       {showTutorial && (
         <GameTutorial game={game} open={showTutorial} onClose={handleTutorialClose} />
